@@ -8,10 +8,10 @@ Chatbots atuais como Alexa e Siri mostram que eles são capazes de lidar com vá
 Implementar o M(etereologista) A(utomatizado) X, um \textit{chatbot} que informe a temperatura atual de uma localização e também a previsão para uma semana deste local.
 
 ### Objetivos Específicos
-  ##### - Entender o funcionamento da API do AccuWeather 
-  ##### - Implementar o Servidor do M.A.X
-  ##### - Implementar o Cliente do M.A.X que se comunica com o Servidor do M.A.X
-  ##### - Acessar o AccuWeather utilizando o servidor do chatbot para informar a previsão do tempo para o Cliente
+  - Entender o funcionamento da API do AccuWeather 
+  - Implementar o Servidor do M.A.X
+  - Implementar o Cliente do M.A.X que se comunica com o Servidor do M.A.X
+  - Acessar o AccuWeather utilizando o servidor do chatbot para informar a previsão do tempo para o Cliente
 
 ### Metodologia
 Para a implementação do M.A.X, será utilizada a linguagem de programação Python \cite{python} em sua versão 3, a comunicaçao entre o cliente e o servidor, serão utilizados \textit{sockets} (que permitem a comunicação entre processos através de portas distintas, estejam eles na mesma máquina, ou em máquinas diferentes). 
