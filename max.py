@@ -46,7 +46,7 @@ def help(argument):
     :param argument: string que representa o comando para mais informacoes
     :return: string com os comandos disponiveis ou mais informacoes sobre um comando
     """
-    answer = "Os comandos devem iniciar com \  exit, devs, datahora, weather <cidade>, watherweek <cidade>, help <comando>"
+    answer = "Comandos: \n \exit \n \devs \n \datahora, \n \weather <cidade> \n \weatherweek <cidade> \n \help <comando>"
     print("")
     if argument != "":
         if argument == "DEVS":
@@ -74,20 +74,8 @@ def weather(argument):
     :return: condicao climatica atual da localizacao ou uma mensagem de erro caso a cidade nao tenha sido informada
     """
     if argument != "":
-        #TODO arrumar a url
-        searchAddress = "http://dataservice.accuweather.com/locations/v1/cities/search?apikey=" + API + "&q=" + argument + "&language=pt-br"
-        #TODO verificar o request da urlopen
-        with urllib.request.urlopen(searchAddress) as searchAddress:
-            data = json.loads(searchAddress.read().decode())
-            print(data)
-        locationKey = data[0]['Key'] # pega o valor do campo key
-
-        forecast = "http://dataservice.accuweather.com/locations/v1/hourly/1hour" + locationKey + "?apikey=" + API + "&language=pt-BR&details=true"
-        with urllib.request.urlopen(forecast) as forecast:
-            data = json.loads(forecast.read().decode())
-            Fahrenheit  = data["Temperature"]["Value"]
-            Celsius = (Fahrenheit - 32)/1.8000
-            answer = "Temperatura em " + argument + ":" + str(Celsius) + "graus Celsius" # string que sera retornada para o cliente
+        #TODO implementar o proprio HTTP
+        pass
 
     else:
         answer = "Comando necessita de uma localizacao. Digite \help para saber mais"
@@ -102,6 +90,7 @@ def weatherWeek(argument):
     :return: temperatura da semana
     """
     pass
+
 
 
 # laco principal do servidor
@@ -121,7 +110,10 @@ while True:
         command, argument = "", ""
         print("data: ", data)
         try:
-            command, argument = data.split(" ")  # divide a string em espacos
+            command = data.split(" ")[0]  # divide a string em espacos e pega o primeiro elemento
+            print(command)
+            argument = data.split(command)[1]  # pega o restante da string, retirando o comando
+            argument = argument[1:] #remove o primeiro espaco da string
         except ValueError:
             print("sem argumentos passados")
             command = data
@@ -150,7 +142,6 @@ while True:
             c.send(answer.encode()) # envia a resposta para o cliente
     else:
         c.send(answer.encode())
-
 
 
 c.close()
