@@ -50,7 +50,7 @@ def dataHora():
 def help(argument):
     """
     funcao que retorna a lista de comandos disponiveis
-    :param argument: string que representa o comando para mais informacoes
+    :param argument: string que representa o comando que se deseja mais informacoes
     :return: string com os comandos disponiveis ou mais informacoes sobre um comando
     """
     if argument != "":
@@ -83,11 +83,26 @@ def weather(argument):
     :param argument: string que eh a cidade a ser pesquisada
     :return: condicao climatica atual da localizacao ou uma mensagem de erro caso a cidade nao tenha sido informada
     """
-    if argument != "":  # TODO implementar o proprio HTTP
+    if argument != "":  # TODO implementar o proprio request get HTTP
         print("[LOG] Pesquisando previsão...")
-        requisicao = requests.get(
-            'http://api.openweathermap.org/data/2.5/weather?q=' + argument + '&appid=778c214add5c6263ad53043ba7bf546d')
-        tempo = json.loads(requisicao.text)
+
+        sockOpenWeather = socket.socket(socket.AF_INET,
+                                        socket.SOCK_STREAM)  # abre conexao com o servidor do Openweather
+        sockOpenWeather.connect(("api.openweathermap.org", 80))  # conecta com a api
+        request = (
+                    'GET /data/2.5/weather?q=' + argument +
+                    '&appid=778c214add5c6263ad53043ba7bf546d HTTP/1.1\r\nHost: api.openweathermap.org\r\n\r\n')
+        sockOpenWeather.sendall(request.encode('utf-8'))  # envia request GET http para a api
+        requisicao = sockOpenWeather.recv(4096).decode()
+
+        sockOpenWeather.close()  # fecha conexao
+
+        requisicao = requisicao.split('{', 1)  # divide a string em 2
+        js = requisicao[1]  # pega apenas  a parte que eh o json
+        js = '{' + js  # readiciona uma { no inicio da string q eh o json
+
+        tempo = json.loads(js)
+
         status = tempo['weather'][0]['description']
         qChuva = 0
         if tempo['weather'][0]['main'] == "Rain" and 'rain' in tempo:
