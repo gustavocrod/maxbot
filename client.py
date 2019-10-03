@@ -1,19 +1,33 @@
 import socket
+import time
 
+host, port = 'localhost', 8000
 
-host, port = '127.0.0.1', 8000
+# timeout= 0.2
 
-s = socket.socket()
-s.connect((host, port))
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server.connect((host, port))  # conecta com servidor TCP
+data = server.recv(4096).decode()  # recebe resposta de conexão do servidor
 
-print("Aperte q e de enter para sair\n")
-message = input("$ ")
+if str(data) == "ACK":
+    print("Conectado ao servidor " + host + ", porta: " + str(port) + ", " + data + " recebido!")
+    # time.sleep(timeout)   #timeout de espera para resposta do servidor
 
-while message != 'q':
-    s.send(message.encode())
-    data = s.recv(1024).decode()
+    while True:
 
-    print('MAX: ' + data)
-    message = input("$ ")
+        print("Aperte q e de enter para sair\n")
+        message = input("$ ")  # recebe o que cliente digitar
 
-s.close()
+        while message != 'q':
+            server.send(message.encode())  # envia para servidor o que cliente solicitou
+            data = server.recv(4096).decode()  # recebe resposta do servidor
+
+            print('-- MAX: \n' + data)  # mostra na tela resposta do servidor
+            message = input("$ ")
+
+        break
+    server.close()
+    print("\nConexão encerrada com servidor!")
+else:
+    print("Não conseguiu conectar ao servidor " + host + ", porta: " + str(port))
+    server.close()

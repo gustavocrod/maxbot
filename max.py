@@ -1,54 +1,59 @@
-import socket
-import json
-import time
 import datetime
+import json
+import requests
+import socket
+import time
+import urllib.parse
 import urllib.request
+import threading
 
-API="nnvBpHyP6BUcWPiePvvGcPdtTkUOhrz8"
-host = '127.0.0.1'
+# APIs do AccuWeather
+# API = "5EHm0OouVq2MYsFa91FGKPadu6raFZEF"
+API = "nnvBpHyP6BUcWPiePvvGcPdtTkUOhrz8"
+
+# APIs do Yandex tradutor
+API_T = 'trnsl.1.1.20190927T202249Z.ae7d6ae63ea79bdc.69b6616a32a45b1f3412c33ac2de768277b6515c'
+urlt = 'https://translate.yandex.net/api/v1.5/tr.json/translate'
+
+# informacoes do nosso servidor
+ip = 'localhost'
 port = 8000
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server.bind((ip, port))
+server.listen(0)
 
-nome1= "Gustavo Rodrigues"
-nome2= "Igor Capeletti"
+ack = "ACK"
 
-s = socket.socket()
-s.bind((host, port))
-s.listen(5)
-print("ouvindo na porta " + str(port) + "...")
+print("Escutando " + str(ip) + " porta " + str(port) + "...\n")  # inicia servidor
 
-c, addr = s.accept()  # estabelece conexao com cliente
-print("Conectado com ", addr)
-
-class DeuProblema(Exception): pass
 
 def devs():
     """
     Funcao que retorna os nomes dos desenvolvedores
     :return answer: uma string com os nomes
     """
-    answer = "Developers: " + nome1 + " e " + nome2
+    answer = "Developers: \n1 - Gustavo Rodrigues \n2 - Igor Capeletti"
     return answer
+
 
 def dataHora():
     """
     funcao que solicita o horairo local da maquina
     :return answer: uma string com o horario atual
     """
-
     time = datetime.datetime.now()
     answer = "Data e hora atual: " + str(time)
     return answer
 
+
 def help(argument):
     """
     funcao que retorna a lista de comandos disponiveis
-
     :param argument: string que representa o comando para mais informacoes
     :return: string com os comandos disponiveis ou mais informacoes sobre um comando
     """
-    answer = "Comandos: \n \exit \n \devs \n \datahora, \n \weather <cidade> \n \weatherweek <cidade> \n \help <comando>"
-    print("")
     if argument != "":
+        argument = argument.upper()
         if argument == "DEVS":
             answer = "O comando \dev contem mais informacoes sobre os desenvolvedores do MAX"
         elif argument == "DATAHORA":
@@ -60,9 +65,13 @@ def help(argument):
         elif argument == "HELP":
             answer = "LOOOOOOOPP"
         else:
-            answer = "Desculpe, nao reconheco o comando " + argument
+            answer = "Desculpe, nao reconheco o comando \help" + argument
+    else:
+        answer = "Comandos:\n \devs\n \datahora\n \weather <cidade>\n \weatherweek <cidade>\n \help <comando>"
+        print(answer)
 
     return answer
+
 
 def weather(argument):
     """
@@ -73,75 +82,170 @@ def weather(argument):
     :param argument: string que eh a cidade a ser pesquisada
     :return: condicao climatica atual da localizacao ou uma mensagem de erro caso a cidade nao tenha sido informada
     """
-    if argument != "":
-        #TODO implementar o proprio HTTP
-        pass
+    if argument != "":  # TODO implementar o proprio HTTP
+        print("Pesquisando previsão...")
+        requisicao = requests.get(
+            'http://api.openweathermap.org/data/2.5/weather?q=' + argument + '&appid=778c214add5c6263ad53043ba7bf546d')
+        tempo = json.loads(requisicao.text)
+        status = tempo['weather'][0]['description']
+        qChuva = 0
+        if tempo['weather'][0]['main'] == "Rain" and 'rain' in tempo:
+            qChuva = list(tempo['rain'].values())[0]
 
+        print("traduzindo...")
+        params = dict(key=API_T, text=status, lang='en-pt')
+        res = requests.get(urlt, params=params)
+        jsonT = res.json()
+        status = str(jsonT['text'][0])
+        answer = "Cidade " + argument + "\nStatus atual: " + status + "\nPrevisão de " + str(
+            qChuva) + "mm\nTemperatura atual: " + str(
+            round((float(tempo['main']['temp'])) - 273.15)) + "°C\nUmidade em " + str(
+            tempo['main']['humidity']) + "%\nVelocidade do vento em " + str(
+            round((float(tempo['wind']['speed'])) * 3.6)) + " km/h"
     else:
         answer = "Comando necessita de uma localizacao. Digite \help para saber mais"
 
     return answer
 
-#TODO
+
 def weatherWeek(argument):
     """
     funcao que recebe uma cidade como parametro e retorna a previsao do tempo para ela, no periodo de uma semana
     :param argument: string que representa a cidade a ser pesquisada
     :return: temperatura da semana
     """
-    pass
+    if argument != "":  # TODO implementar o proprio HTTP
+        print("Cidade " + argument + " recebida do cliente!")
+        city = urllib.parse.quote(str(argument))
 
+        print("Cidade " + str(city) + " recebida do cliente e transformada para formato URLs!")
+        print("Pesquisando previsão...")
+
+        # search_address="http://dataservice.accuweather.com/locations/v1/cities/IN/search?apikey="+API+"&q="+city+"&details=true"
+        search_address = "http://dataservice.accuweather.com/locations/v1/cities/search?apikey=" + API + "&q=" + city + "&details=true"
+        with urllib.request.urlopen(search_address) as search_address:
+            data = json.loads(search_address.read().decode())
+            location_key = data[0]['Key']
+            daily_forcastUrl = "http://dataservice.accuweather.com/forecasts/v1/daily/5day/" + location_key + "?apikey=" + API + "&details=true"
+
+            with urllib.request.urlopen(daily_forcastUrl) as daily_forcastUrl:
+                data = json.loads(daily_forcastUrl.read().decode())
+                resp = ""
+                print("traduzindo...")
+                for key1 in data['DailyForecasts']:
+                    tempMin = round(((key1['Temperature']['Minimum']['Value']) - 32) / 1.8000)
+                    tempMax = round(((key1['Temperature']['Maximum']['Value']) - 32) / 1.8000)
+
+                    # parte da temperatura durante o dia
+                    ventoD = round((key1['Day']['Wind']['Speed']['Value']) * 1.609)
+                    qChuvaD = round((key1['Day']['Rain']['Value']) * 25.4)
+                    statusD = key1['Day']['LongPhrase']
+                    paramsD = dict(key=API_T, text=statusD, lang='en-pt')
+                    resD = requests.get(urlt, params=paramsD)
+                    jsonTD = resD.json()
+                    statusD = str(jsonTD['text'][0])
+
+                    # parte da temperatura durante a noite---------------------------------------
+                    ventoN = round((key1['Night']['Wind']['Speed']['Value']) * 1.609)
+                    qChuvaN = round((key1['Night']['Rain']['Value']) * 25.4)
+                    statusN = key1['Night']['LongPhrase']
+                    paramsN = dict(key=API_T, text=statusN, lang='en-pt')
+                    resN = requests.get(urlt, params=paramsN)
+                    jsonTN = resD.json()
+                    statusN = str(jsonTN['text'][0])
+
+                    diaData = key1['Date']
+                    resp = resp + ("\n-----------\nData: " + diaData[8:10] + "/" + diaData[5:7] + "/" + diaData[
+                                                                                                        0:4] + "\nTemperatura mínima: " + str(
+                        tempMin) + "\nTemperatura máxima: " + str(
+                        tempMax) + "\n--Durante o dia:" + "\nPrevisão do tempo: " + statusD + "\nChuva " + str(
+                        qChuvaD) + "mm\nVento " + str(
+                        ventoD) + "km/h\n--Durante a noite:" + "\nPrevisão do tempo: " + statusN + "\nChuva " + str(
+                        qChuvaN) + "mm\nVento " + str(ventoN) + "km/h")
+
+                answer = "Previsão do tempo para " + argument + " durante os próximos dias:\n" + resp
+
+    else:
+        answer = "Comando necessita de uma localizacao. Digite \help para saber mais"
+
+    return answer
+
+
+# parte de threads do servidor
+def conecta(client, endereco):
+    print("Conectado com cliente " + str(endereco[0]) + ":" + str(endereco[1]))
+    client.send(str(ack).encode())  # envia ACK para o cliente(confirmação de conexão com este servidor)
+    print("ACK enviada para cliente!")
+
+    cont = 1
+    while True:
+        data = client.recv(4096).decode()  # aguarda até cliente enviar alguma mensagem e salva na variável data
+        print("-------- Cliente " + str(endereco[0]) + ":" + str(endereco[1]) + " ---- Solicitação " + str(
+            cont) + " ----")
+        cont = cont + 1
+        # print("Recebido "+ data)
+        # client_socket.send("Mensagem destinada ao cliente "+ ip)
+        # cliente.send(str("\nACK! \nRecebido pelo servidor!\n").encode())
+
+        if not data:
+            print("Cliente desconectou!")
+            break
+
+        isCommand = ord(data[0])  # pega o codigo ascii do primeiro character da string
+        if isCommand == 92:  # entao eh um comando 92 == '\'
+            data = data[1:]  # recebe string do segundo caracter ao ultimo - retira o \
+            answer = ""
+            # print("data: ", data)
+
+            if data.count(' ') == 0:
+                command = data
+                command = command.upper()  # transforma tudo em caixa alta
+                print("command= " + command)
+                # print("sem argumento passado")
+                if command == "HELP":
+                    answer = help("")
+                elif command == "DATAHORA":
+                    answer = dataHora()
+                elif command == "DEVS":
+                    answer = devs()
+                else:
+                    answer = "Comando inválido. Digite \help para saber mais"
+            else:
+                command = data.split(" ")[0]  # divide a string em espacos e pega o primeiro elemento
+                argument = data.split(command + " ")[1]  # pega o restante da string, retirando o comando+space
+                command = command.upper()  # transforma tudo em caixa alta
+                print("comando: '" + command + "' argumento: '" + argument + "'")
+                if command == "HELP":
+                    answer = help(argument)
+
+                elif command == "WEATHER":
+                    answer = weather(argument)
+
+                elif command == "WEATHERWEEK":
+                    answer = weatherWeek(argument)
+
+                else:
+                    answer = "Comando com argumento inválido. Digite \help para saber mais"
+
+            client.send(str(answer).encode())  # envia a resposta para o cliente, depois de processada pelo server
+            print("Resposta processada e enviada para cliente " + str(endereco[0]) + ":" + str(endereco[1]))
+        else:
+            answer = data
+            client.send(str(answer).encode())  # envia para o cliente mesma coisa que ele mandou pois não é comando
+            print("Mensagem de cliente não é comando, reenviada mesma mensagem para cliente")
+
+    print("Thread com cliente finalizada!")
 
 
 # laco principal do servidor
 while True:
-    data = c.recv(1024).decode()
+    client, endereco = server.accept()  # aceita conexão dos clientes
+    threading.Thread(target=conecta, args=(client, endereco)).start()
 
-    print("Cliente disse " + str(data))
+    # client_handler= threading.Thread(target=handle_client, args=(client,))
+    # client_handler.start()
 
-    if not data:
-        break
+    # socket.gethostbyname()
 
-    isCommand = ord(data[0])  # pega o codigo ascii do primeiro character da string
-    answer = data
-    if isCommand == 92: # entao eh um comando
-        data = data[1:] # edita a string do segundo caracter ao ultimo - retira o \
-        data = data.upper() # transforma tudo em caixa alta
-        command, argument = "", ""
-        print("data: ", data)
-        try:
-            command = data.split(" ")[0]  # divide a string em espacos e pega o primeiro elemento
-            print(command)
-            argument = data.split(command)[1]  # pega o restante da string, retirando o comando
-            argument = argument[1:] #remove o primeiro espaco da string
-        except ValueError:
-            print("sem argumentos passados")
-            command = data
-            if command == "HELP":
-                answer = help(argument)
-            elif command == "DATAHORA":
-                answer = dataHora()
-            elif command == "DEVS":
-                answer = devs()
-            else:
-                answer = "Comando invalido. Digite \help para saber mais"
-        else:
-            print("comando: " + command + " argumento: " + argument)
-            if command == "HELP":
-                answer = help(argument)
-
-            elif command == "WEATHER":
-                answer = weather(argument)
-
-            elif command == "WEATHERWEEK":
-                answer = weatherWeek(argument)
-
-            else:
-                answer = "Comando invalido. Digite \help para saber mais"
-        finally:
-            c.send(answer.encode()) # envia a resposta para o cliente
-    else:
-        c.send(answer.encode())
-
-
-c.close()
+    # print("Conexão aceita de "+addr[0]+": "+str(addr[1]))
+    # nova_thread= handle_client(client) #thread chamada de cada cliente
