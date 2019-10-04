@@ -84,7 +84,7 @@ def makeConnection(client, endereco):
 
     print("[LOG] Thread com cliente finalizada!")
 
-def runServer(ip='localhost', port='8000'):
+def runServer(ip, port):
     """
     funcao responsavel pela iniclializacao do servidor e de criar conexoes com cada cliente
     :param ip: ip em qual rodara o servidor "localhost"
@@ -94,6 +94,7 @@ def runServer(ip='localhost', port='8000'):
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind((ip, port))
     server.listen(0)
+
 
     print("[LOG] Escutando " + str(ip) + ":" + str(port) + "...\n")  # inicia servidor
 
@@ -107,8 +108,9 @@ def main():
     :return:
     """
     args = makeArgs()
+    print(type(args.host), type(args.port))
 
-    if args.port == True:
+    if args.port:
         runServer(args.host, args.port)
 
 if __name__ == "__main__":

@@ -7,8 +7,8 @@ def makeArgs():
     """
     parser = argparse.ArgumentParser(description="client max")
 
-    parser.add_argument("--ip", action="store", dest="host")
-    parser.add_argument("--port", action="store", dest="port")
+    parser.add_argument("--ip", "-ip", action="store", dest="host")
+    parser.add_argument("--port", "-port", type=int, action="store", dest="port", help="Porta onde o servidor roda")
 
     args = parser.parse_args()
 

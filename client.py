@@ -56,7 +56,7 @@ def main():
     """
     args = makeArgs()
 
-    if (args.ip == True) and (args.port == True):
+    if (args.host) and (args.port):
         makeConnection(args.host, args.port)
 
 
