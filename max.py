@@ -108,8 +108,6 @@ def main():
     :return:
     """
     args = makeArgs()
-    print(type(args.host), type(args.port))
-
     if args.port:
         runServer(args.host, args.port)
 
