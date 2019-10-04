@@ -13,7 +13,8 @@ def clientHandler(server):
         printMax()
         printHelpClient()
         message = input("$ ")  # recebe o que cliente digitar
-
+        os.system("clear")
+        print("[PROCESSANDO ...]")
         while message != 'q':
             server.send(message.encode())  # envia para servidor o que cliente solicitou
             data = server.recv(4096).decode()  # recebe resposta do servidor
