@@ -2,6 +2,8 @@
 
 ![MAX](images/max.png)
 
+## Contexto histórico
+
 O Teste de Turing foi desenvolvido por Alan Turing em 1950. O teste resume-se em: para uma máquina passar no
 Teste de Turing, ela deve exibir um comportamento inteligente indistinguível do comportamento de um ser humano.
 Apesar de vários estudos terem sidos realizados acerca desse problema, as máquinas capazes de alcançar o sucesso no
