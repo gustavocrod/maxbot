@@ -69,7 +69,7 @@ Função que requisita ao serviço de metereologia, via request http (GET) e ret
 * **Retorno**
    * **answer** - condição climatica atual da localização ou uma mensagem de erro caso a cidade não tenha sido informada
    
-##### commands.weatherWeek(argument)
+#### commands.weatherWeek(argument)
 Função que recebe uma cidade como parametro, e requisita ao serviço de metereologia, via request http (GET) e retorna a previsão do tempo para ela, no período de uma semana
 
 * **Parametros**
