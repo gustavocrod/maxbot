@@ -1,5 +1,7 @@
 # M.A.X
 
+![MAX](images/max.jpg)
+
 O Teste de Turing foi desenvolvido por Alan Turing em 1950. O teste resume-se em: para uma máquina passar no
 Teste de Turing, ela deve exibir um comportamento inteligente indistinguível do comportamento de um ser humano.
 Apesar de vários estudos terem sidos realizados acerca desse problema, as máquinas capazes de alcançar o sucesso no
@@ -35,7 +37,7 @@ O código possui 2 instâncias:
 
 Como um cliente, é possivel utilizar os seguintes comandos:
 
-| Comando        | Como Funciona   | Sintaxe  |
+| Comando        | Sobre   | Sintaxe  |
 | ------------- |:-------------:| :-----:|
 | datahora     | Informa a data e hora atual | ```$ \datahora ``` |
 | devs     | Mostra informacoes sobre os desenvolvedores do MAX | ```$ \devs ``` |

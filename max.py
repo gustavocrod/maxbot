@@ -3,13 +3,8 @@ import threading
 from util import makeArgs
 from commands import *
 
-# APIs do AccuWeather
-# API = "5EHm0OouVq2MYsFa91FGKPadu6raFZEF"
-API = "nnvBpHyP6BUcWPiePvvGcPdtTkUOhrz8"
+
 ack = "ACK"
-# APIs do Yandex tradutor
-API_T = 'trnsl.1.1.20190927T202249Z.ae7d6ae63ea79bdc.69b6616a32a45b1f3412c33ac2de768277b6515c'
-urlt = 'https://translate.yandex.net/api/v1.5/tr.json/translate'
 
 
 # parte de threads do servidor
