@@ -58,7 +58,7 @@ def main():
     args = makeArgs()
 
     if (args.ip) and (args.port):
-        makeConnection(args.host, args.port)
+        makeConnection(args.ip, args.port)
 
 
 if __name__ == "__main__":
