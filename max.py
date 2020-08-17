@@ -104,7 +104,7 @@ def main():
     """
     args = makeArgs()
     if args.port:
-        runServer(args.host, args.port)
+        runServer(args.ip, args.port)
 
 if __name__ == "__main__":
     main()
